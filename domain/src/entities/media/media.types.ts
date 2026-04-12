@@ -13,6 +13,7 @@ export type Movie = BaseMedia & {
   type: "movie";
   activity: "watch";
   status: Status<"watch">;
+  progress: Progress<"watch">;
 };
 
 export type Show = BaseMedia & {
