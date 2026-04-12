@@ -1,0 +1,1 @@
+export type Activity = "watch" | "read" | "play" | "listen";
