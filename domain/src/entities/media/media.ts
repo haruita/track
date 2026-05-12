@@ -1,5 +1,6 @@
 import {
   Anime,
+  LiveAction,
   Movie,
   Show,
   Book,
@@ -14,6 +15,7 @@ import {
 
 export type Media =
   | Anime
+  | LiveAction
   | Movie
   | Show
   | Book

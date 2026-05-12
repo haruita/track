@@ -9,6 +9,13 @@ export type Anime = BaseMedia & {
   progress: Progress<"watch">;
 };
 
+export type LiveAction = BaseMedia & {
+  type: "liveaction";
+  activity: "watch";
+  status: Status<"watch">;
+  progress: Progress<"watch">;
+};
+
 export type Movie = BaseMedia & {
   type: "movie";
   activity: "watch";
