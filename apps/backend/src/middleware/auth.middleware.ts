@@ -9,19 +9,23 @@ export function authMiddleware(
 ) {
   const authHeader = req.headers.authorization;
 
-if (!authHeader) {
-  return res.status(401).json({
-    message: "Missing token",
-  });
-}
+  if (!authHeader) {
+    return res.status(401).json({
+      message: "Missing token",
+    });
+  }
 
-const token = authHeader.split(" ")[1];
+  const token = authHeader.split(" ")[1];
 
-if (!token) {
-  return res.status(401).json({
-    message: "Invalid token format",
-  });
-}
+  try {
+    const decoded = verifyToken(token);
 
-const decoded = verifyToken(token);
+    req.user = decoded;
+
+    next();
+  } catch {
+    return res.status(401).json({
+      message: "Invalid token",
+    });
+  }
 }
