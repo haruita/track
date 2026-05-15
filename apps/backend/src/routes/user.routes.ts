@@ -1,27 +1,33 @@
 import { Router } from "express";
-
 import { prisma } from "../prisma/client";
-
 import { authMiddleware } from "../middleware/auth.middleware";
-import { adminMiddleware } from "../middleware/admin.middleware";
 
-export const userRouter = Router();
-
-userRouter.use(authMiddleware);
+export const userRouter =
+  Router();
 
 userRouter.get(
-  "/users",
-  adminMiddleware,
-  async (_, res) => {
-    const users =
-      await prisma.user.findMany({
+  "/me",
+
+  authMiddleware,
+
+  async (req, res) => {
+    const userId =
+      req.user!.id;
+
+    const user =
+      await prisma.user.findUnique({
+        where: {
+          id: userId,
+        },
+
         select: {
           id: true,
-          username: true,
+          name: true,
           email: true,
           role: true,
         },
       });
-    res.json(users);
+
+    res.json(user);
   }
 );

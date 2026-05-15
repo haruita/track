@@ -1,14 +1,33 @@
 import { Routes, Route } from "react-router-dom";
+import { useState } from "react";
 import { Navbar } from "./components/Navbar";
+import { LoginModal } from "./components/LoginModal";
+import { RegisterModal } from "./components/RegisterModal";
 import { HomePage } from "./pages/HomePage";
-import { MediaDetailsPage } from "./pages/MediaDetailsPage";
 import { ProfilePage } from "./pages/ProfilePage";
+import { MediaDetailsPage } from "./pages/MediaDetailsPage";
 import { AdminPage } from "./pages/AdminPage";
 
 function App() {
+  const [showLogin, setShowLogin] =
+    useState(false);
+
+  const [
+    showRegister,
+    setShowRegister,
+  ] = useState(false);
+
   return (
     <>
-      <Navbar />
+      <Navbar
+        onLoginClick={() =>
+          setShowLogin(true)
+        }
+
+        onRegisterClick={() =>
+          setShowRegister(true)
+        }
+      />
 
       <Routes>
         <Route
@@ -17,13 +36,15 @@ function App() {
         />
 
         <Route
-          path="/media/:id"
-          element={<MediaDetailsPage />}
+          path="/profile"
+          element={<ProfilePage />}
         />
 
         <Route
-          path="/profile"
-          element={<ProfilePage />}
+          path="/media/:id"
+          element={
+            <MediaDetailsPage />
+          }
         />
 
         <Route
@@ -31,6 +52,20 @@ function App() {
           element={<AdminPage />}
         />
       </Routes>
+
+      <LoginModal
+        show={showLogin}
+        onHide={() =>
+          setShowLogin(false)
+        }
+      />
+
+      <RegisterModal
+        show={showRegister}
+        onHide={() =>
+          setShowRegister(false)
+        }
+      />
     </>
   );
 }

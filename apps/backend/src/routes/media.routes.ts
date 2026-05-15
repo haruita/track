@@ -1,42 +1,110 @@
 import { Router } from "express";
-
-import {
-  createMedia,
-  getMedia,
-  updateMedia,
-  deleteMedia,
-} from "../use-cases/media";
-
+import { prisma } from "../prisma/client";
 import { authMiddleware } from "../middleware/auth.middleware";
+import { adminMiddleware } from "../middleware/admin.middleware";
 
-export const mediaRouter = Router();
+export const mediaRouter =
+  Router();
 
-mediaRouter.use(authMiddleware);
+// Public routes
 
-mediaRouter.get("/media", async (_, res) => {
-  const media = await getMedia();
-  res.json(media);
-});
+mediaRouter.get(
+  "/",
 
-mediaRouter.post("/media", async (req, res) => {
-  const media = await createMedia(req.body);
-  res.json(media);
-});
+  async (_req, res) => {
+    const media =
+      await prisma.media.findMany();
 
-mediaRouter.put("/media/:id", async (req, res) => {
-  const media = await updateMedia(
-    req.params.id,
-    req.body
-  );
-  res.json(media);
-});
+    res.json(media);
+  }
+);
+
+mediaRouter.get(
+  "/:id",
+
+  async (req, res) => {
+    const id =
+      req.params.id as string;
+
+    const media =
+      await prisma.media.findUnique({
+        where: {
+          id,
+        },
+      });
+
+    if (!media) {
+      return res
+        .status(404)
+        .json({
+          message:
+            "Media not found",
+        });
+    }
+
+    res.json(media);
+  }
+);
+
+// Admin routes
+
+mediaRouter.post(
+  "/",
+
+  authMiddleware,
+  adminMiddleware,
+
+  async (req, res) => {
+    const media =
+      await prisma.media.create({
+        data: req.body,
+      });
+
+    res.json(media);
+  }
+);
+
+mediaRouter.put(
+  "/:id",
+
+  authMiddleware,
+  adminMiddleware,
+
+  async (req, res) => {
+    const id =
+      req.params.id as string;
+
+    const media =
+      await prisma.media.update({
+        where: {
+          id,
+        },
+
+        data: req.body,
+      });
+
+    res.json(media);
+  }
+);
 
 mediaRouter.delete(
-  "/media/:id",
+  "/:id",
+
+  authMiddleware,
+  adminMiddleware,
+
   async (req, res) => {
-    const media = await deleteMedia(
-      req.params.id
-    );
-    res.json(media);
+    const id =
+      req.params.id as string;
+
+    await prisma.media.delete({
+      where: {
+        id,
+      },
+    });
+
+    res.json({
+      message: "Deleted",
+    });
   }
 );
