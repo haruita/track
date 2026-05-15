@@ -37,4 +37,7 @@ model Media {
   progressTotal Int?
 
   progressUnit String
+
+  description String?
+  imageUrl String?
 }

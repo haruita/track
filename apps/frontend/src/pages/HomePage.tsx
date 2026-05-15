@@ -2,29 +2,22 @@ import { useEffect, useState } from "react";
 import { api } from "../api/client";
 import type { Media } from "../types/media";
 
-import { MediaCard }
-  from "../components/MediaCard";
+import { MediaCard } from "../components/MediaCard";
 
 export function HomePage() {
-  const [media, setMedia] =
-    useState<Media[]>([]);
+  const [media, setMedia] = useState<Media[]>([]);
 
-  const [loading, setLoading] =
-    useState(true);
+  const [loading, setLoading] = useState(true);
 
-  const [error, setError] =
-    useState("");
+  const [error, setError] = useState("");
 
   async function loadMedia() {
     try {
-      const response =
-        await api.get("/media");
+      const response = await api.get("/media");
 
       setMedia(response.data);
     } catch {
-      setError(
-        "Failed to load media"
-      );
+      setError("Failed to load media");
     } finally {
       setLoading(false);
     }
@@ -54,9 +47,7 @@ export function HomePage() {
 
   return (
     <div className="container py-4">
-      <h1 className="mb-4">
-        Media Library
-      </h1>
+      <h1 className="mb-4">Media Library</h1>
 
       <div className="row">
         {media.map((item) => (

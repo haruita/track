@@ -7,4 +7,6 @@ export type Media = {
   progressCurrent: number;
   progressTotal?: number;
   progressUnit: string;
+  description?: string;
+  imageUrl?: string;
 };

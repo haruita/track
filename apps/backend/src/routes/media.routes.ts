@@ -2,63 +2,63 @@ import { Router } from "express";
 import { prisma } from "../prisma/client";
 import { authMiddleware } from "../middleware/auth.middleware";
 import { adminMiddleware } from "../middleware/admin.middleware";
+import { upload } from "../middleware/upload";
 
-export const mediaRouter =
-  Router();
+export const mediaRouter = Router();
 
-// Public routes
+mediaRouter.get("/", async (_req, res) => {
+  const media = await prisma.media.findMany();
+  res.json(media);
+});
 
-mediaRouter.get(
-  "/",
+mediaRouter.get("/:id", async (req, res) => {
+  const id = req.params.id as string;
 
-  async (_req, res) => {
-    const media =
-      await prisma.media.findMany();
+  const media = await prisma.media.findUnique({
+    where: { id },
+  });
 
-    res.json(media);
+  if (!media) {
+    return res.status(404).json({ message: "Media not found" });
   }
-);
 
-mediaRouter.get(
-  "/:id",
-
-  async (req, res) => {
-    const id =
-      req.params.id as string;
-
-    const media =
-      await prisma.media.findUnique({
-        where: {
-          id,
-        },
-      });
-
-    if (!media) {
-      return res
-        .status(404)
-        .json({
-          message:
-            "Media not found",
-        });
-    }
-
-    res.json(media);
-  }
-);
-
-// Admin routes
+  res.json(media);
+});
 
 mediaRouter.post(
   "/",
-
   authMiddleware,
   adminMiddleware,
-
+  upload.single("image"),
   async (req, res) => {
-    const media =
-      await prisma.media.create({
-        data: req.body,
-      });
+    const {
+      title,
+      type,
+      activity,
+      status,
+      progressCurrent,
+      progressTotal,
+      progressUnit,
+      description,
+    } = req.body;
+
+    const imageUrl = req.file
+      ? `/uploads/${req.file.filename}`
+      : req.body.imageUrl || undefined;
+
+    const media = await prisma.media.create({
+      data: {
+        title,
+        type,
+        activity,
+        status,
+        progressCurrent: Number(progressCurrent),
+        progressTotal: progressTotal ? Number(progressTotal) : undefined,
+        progressUnit,
+        description: description || undefined,
+        imageUrl,
+      },
+    });
 
     res.json(media);
   }
@@ -66,22 +66,41 @@ mediaRouter.post(
 
 mediaRouter.put(
   "/:id",
-
   authMiddleware,
   adminMiddleware,
-
+  upload.single("image"),
   async (req, res) => {
-    const id =
-      req.params.id as string;
+    const id = req.params.id as string;
 
-    const media =
-      await prisma.media.update({
-        where: {
-          id,
-        },
+    const {
+      title,
+      type,
+      activity,
+      status,
+      progressCurrent,
+      progressTotal,
+      progressUnit,
+      description,
+    } = req.body;
 
-        data: req.body,
-      });
+    const imageUrl = req.file
+      ? `/uploads/${req.file.filename}`
+      : req.body.imageUrl || undefined;
+
+    const media = await prisma.media.update({
+      where: { id },
+      data: {
+        title,
+        type,
+        activity,
+        status,
+        progressCurrent: Number(progressCurrent),
+        progressTotal: progressTotal ? Number(progressTotal) : undefined,
+        progressUnit,
+        description: description || undefined,
+        imageUrl,
+      },
+    });
 
     res.json(media);
   }
@@ -89,22 +108,15 @@ mediaRouter.put(
 
 mediaRouter.delete(
   "/:id",
-
   authMiddleware,
   adminMiddleware,
-
   async (req, res) => {
-    const id =
-      req.params.id as string;
+    const id = req.params.id as string;
 
     await prisma.media.delete({
-      where: {
-        id,
-      },
+      where: { id },
     });
 
-    res.json({
-      message: "Deleted",
-    });
+    res.json({ message: "Deleted" });
   }
 );
