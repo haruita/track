@@ -1,24 +1,21 @@
 import bcrypt from "bcryptjs";
 import { UserRepository } from "../repositories/UserRepository";
 
-export class LoginUserUseCase { constructor (private userRepository: UserRepository) {}
+export class RegisterUserUseCase {
+  constructor(private userRepository: UserRepository) {}
 
   async execute(data: {
+    username: string;
     email: string;
     password: string;
   }) {
-    const user = await this.userRepository.findByEmail(data.email);
+    const passwordHash = await bcrypt.hash(data.password, 10);
 
-    if (!user) { 
-        throw new Error("Invalid credentials");
-    }
-
-    const validPassword = await bcrypt.compare(data.password, user.password);
-
-    if (!validPassword) {
-      throw new Error("Invalid credentials");
-    }
-
-    return user;
+    return this.userRepository.create({
+      username: data.username,
+      email: data.email,
+      passwordHash,
+      role: "USER",
+    });
   }
 }

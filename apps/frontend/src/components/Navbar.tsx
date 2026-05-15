@@ -48,7 +48,7 @@ export function Navbar({
 
     const payload = parseJwt(token);
 
-    if (payload?.role === "admin") {
+    if (payload?.role === "ADMIN") {
       setIsAdmin(true);
     }
   }, []);

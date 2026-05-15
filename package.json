@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "tsx src/index.ts",
-    "test": "vitest",
-    "test:watch": "vitest --watch"
+    "dev": "pnpm --dir apps/backend dev",
+    "test": "pnpm --dir domain test",
+    "test:watch": "pnpm --dir domain test:watch"
   },
   "keywords": [],
   "author": "",

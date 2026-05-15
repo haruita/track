@@ -17,7 +17,7 @@ export class LoginUserUseCase { constructor (private userRepository: UserReposit
     const validPassword =
       await bcrypt.compare(
         data.password,
-        user.password
+        user.passwordHash
       );
 
     if (!validPassword) {

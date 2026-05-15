@@ -19,6 +19,11 @@ export function AdminPage() {
     useState("watching");
 
   const [
+    progressCurrent,
+    setProgressCurrent,
+  ] = useState(0);
+
+  const [
     progressTotal,
     setProgressTotal,
   ] = useState(12);
@@ -48,7 +53,7 @@ export function AdminPage() {
       type,
       activity,
       status,
-      progressCurrent: 0,
+      progressCurrent,
       progressTotal,
       progressUnit,
     };
@@ -91,6 +96,9 @@ export function AdminPage() {
     setType(item.type);
     setActivity(item.activity);
     setStatus(item.status);
+    setProgressCurrent(
+      item.progressCurrent
+    );
     setProgressTotal(
       item.progressTotal ?? 0
     );
@@ -106,6 +114,7 @@ export function AdminPage() {
     setType("anime");
     setActivity("watch");
     setStatus("watching");
+    setProgressCurrent(0);
     setProgressTotal(12);
     setProgressUnit("episode");
   }
@@ -257,6 +266,20 @@ export function AdminPage() {
             Track
           </option>
         </select>
+
+        <input
+          type="number"
+          className="form-control mb-3"
+          placeholder="Current"
+          value={progressCurrent}
+          onChange={(e) =>
+            setProgressCurrent(
+              Number(
+                e.target.value
+              )
+            )
+          }
+        />
 
         <input
           type="number"
