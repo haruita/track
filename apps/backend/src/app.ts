@@ -13,3 +13,11 @@ app.use("/uploads", express.static(path.resolve(process.cwd(), "uploads")));
 app.use("/media", mediaRouter);
 app.use("/auth", authRouter);
 app.use("/users", userRouter);
+
+if (process.env.NODE_ENV === "production") {
+  app.use(express.static(path.resolve(process.cwd(), "dist/frontend")));
+
+  app.get("/{*path}", (_req, res) => {
+    res.sendFile(path.resolve(process.cwd(), "dist/frontend/index.html"));
+  });
+}

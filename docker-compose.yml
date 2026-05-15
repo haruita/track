@@ -1,0 +1,16 @@
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - db-data:/app/prisma
+      - uploads-data:/app/uploads
+    environment:
+      - DATABASE_URL=file:./prisma/dev.db
+      - JWT_SECRET=${JWT_SECRET:-super_secret_key_change_me}
+    restart: unless-stopped
+
+volumes:
+  db-data:
+  uploads-data:

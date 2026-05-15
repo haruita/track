@@ -49,6 +49,14 @@ Root-level `pnpm dev` → backend, `pnpm test` / `pnpm test:watch` → domain. U
 - Only **domain** has tests configured (`domain/vitest.config.ts`)
 - No test setup for frontend or backend
 
+## Docker
+
+- `docker compose up --build` — builds and starts the app on port 3000
+- Single service: backend serves both API and static frontend files
+- SQLite database and uploads persisted via named volumes (`db-data`, `uploads-data`)
+- Seed runs on startup: creates 3 media entries with cover images + admin user (`admin@test.com` / `admin123`)
+- `JWT_SECRET` configurable via `.env` or docker-compose environment
+
 ## Notes
 
 - Each app has its own `pnpm-lock.yaml` and `node_modules/` (not a unified pnpm workspace)
