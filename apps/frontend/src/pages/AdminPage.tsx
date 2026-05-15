@@ -100,6 +100,18 @@ export function AdminPage() {
 
   const displayUrl = previewUrl || existingImageUrl;
 
+  const formField = (
+    label: string,
+    description: string,
+    input: React.ReactNode
+  ) => (
+    <div className="mb-3">
+      <label className="form-label fw-semibold">{label}</label>
+      {input}
+      <div className="form-text">{description}</div>
+    </div>
+  );
+
   return (
     <div className="container py-4">
       <h1 className="mb-4">Admin Panel</h1>
@@ -109,96 +121,124 @@ export function AdminPage() {
           {editingId ? "Edit Media" : "Create Media"}
         </h5>
 
-        <input
-          className="form-control mb-3"
-          placeholder="Title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-        />
-
-        <select
-          className="form-select mb-3"
-          value={type}
-          onChange={(e) => setType(e.target.value)}
-        >
-          <option value="anime">Anime</option>
-          <option value="movie">Movie</option>
-          <option value="game">Game</option>
-          <option value="book">Book</option>
-          <option value="visual_novel">Visual Novel</option>
-          <option value="podcast">Podcast</option>
-          <option value="music_album">Music Album</option>
-        </select>
-
-        <select
-          className="form-select mb-3"
-          value={activity}
-          onChange={(e) => setActivity(e.target.value)}
-        >
-          <option value="watch">Watch</option>
-          <option value="read">Read</option>
-          <option value="play">Play</option>
-          <option value="listen">Listen</option>
-        </select>
-
-        <select
-          className="form-select mb-3"
-          value={status}
-          onChange={(e) => setStatus(e.target.value)}
-        >
-          <option value="planned">Planned</option>
-          <option value="watching">Watching</option>
-          <option value="reading">Reading</option>
-          <option value="playing">Playing</option>
-          <option value="completed">Completed</option>
-        </select>
-
-        <select
-          className="form-select mb-3"
-          value={progressUnit}
-          onChange={(e) => setProgressUnit(e.target.value)}
-        >
-          <option value="episode">Episode</option>
-          <option value="chapter">Chapter</option>
-          <option value="page">Page</option>
-          <option value="hour">Hour</option>
-          <option value="track">Track</option>
-        </select>
-
-        <input
-          type="number"
-          className="form-control mb-3"
-          placeholder="Total"
-          value={progressTotal}
-          onChange={(e) => setProgressTotal(Number(e.target.value))}
-        />
-
-        <div className="mb-3">
-          <label className="form-label">Image</label>
+        {formField(
+          "Title",
+          "The name of the media entry.",
           <input
-            type="file"
             className="form-control"
-            accept="image/*"
-            onChange={handleFileChange}
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
           />
-          {displayUrl && (
-            <div className="mt-2">
-              <img
-                src={displayUrl.startsWith("/") ? `http://localhost:3000${displayUrl}` : displayUrl}
-                alt="Preview"
-                style={{ maxWidth: "200px", maxHeight: "150px", objectFit: "cover", borderRadius: "4px" }}
-              />
-            </div>
-          )}
-        </div>
+        )}
 
-        <textarea
-          className="form-control mb-3"
-          placeholder="Description"
-          rows={3}
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-        />
+        {formField(
+          "Type",
+          "The category this media belongs to.",
+          <select
+            className="form-select"
+            value={type}
+            onChange={(e) => setType(e.target.value)}
+          >
+            <option value="anime">Anime</option>
+            <option value="movie">Movie</option>
+            <option value="game">Game</option>
+            <option value="book">Book</option>
+            <option value="visual_novel">Visual Novel</option>
+            <option value="podcast">Podcast</option>
+            <option value="music_album">Music Album</option>
+          </select>
+        )}
+
+        {formField(
+          "Activity",
+          "The action verb associated with this type of media.",
+          <select
+            className="form-select"
+            value={activity}
+            onChange={(e) => setActivity(e.target.value)}
+          >
+            <option value="watch">Watch</option>
+            <option value="read">Read</option>
+            <option value="play">Play</option>
+            <option value="listen">Listen</option>
+          </select>
+        )}
+
+        {formField(
+          "Status",
+          "Current progress state of the media.",
+          <select
+            className="form-select"
+            value={status}
+            onChange={(e) => setStatus(e.target.value)}
+          >
+            <option value="planned">Planned</option>
+            <option value="watching">Watching</option>
+            <option value="reading">Reading</option>
+            <option value="playing">Playing</option>
+            <option value="completed">Completed</option>
+          </select>
+        )}
+
+        {formField(
+          "Progress Unit",
+          "The unit used to measure progress (episodes, chapters, hours, etc).",
+          <select
+            className="form-select"
+            value={progressUnit}
+            onChange={(e) => setProgressUnit(e.target.value)}
+          >
+            <option value="episode">Episodes</option>
+            <option value="chapter">Chapters</option>
+            <option value="page">Pages</option>
+            <option value="hour">Hours</option>
+            <option value="track">Tracks</option>
+          </select>
+        )}
+
+        {formField(
+          "Total",
+          "The total count of units to complete this media.",
+          <input
+            type="number"
+            className="form-control"
+            value={progressTotal}
+            onChange={(e) => setProgressTotal(Number(e.target.value))}
+          />
+        )}
+
+        {formField(
+          "Cover Image",
+          "Upload a cover image for this media entry.",
+          <>
+            <input
+              type="file"
+              className="form-control"
+              accept="image/*"
+              onChange={handleFileChange}
+            />
+            {displayUrl && (
+              <div className="mt-2">
+                <img
+                  src={displayUrl.startsWith("/") ? `http://localhost:3000${displayUrl}` : displayUrl}
+                  alt="Preview"
+                  style={{ maxWidth: "200px", maxHeight: "150px", objectFit: "cover", borderRadius: "4px" }}
+                />
+              </div>
+            )}
+          </>
+        )}
+
+        {formField(
+          "Description",
+          "A short summary of the media content.",
+          <textarea
+            className="form-control"
+            rows={3}
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          />
+        )}
 
         <div className="d-flex gap-2">
           <button
@@ -239,7 +279,7 @@ export function AdminPage() {
                   <td>{formatType(item.type)}</td>
                   <td>{formatType(item.status)}</td>
                   <td>
-                    {item.progressTotal ?? "—"} {item.progressTotal ? formatType(item.progressUnit) : ""}
+                    {item.progressTotal ?? "—"} {item.progressTotal ? formatType(item.progressUnit) : ""}s
                   </td>
                   <td>
                     <div className="d-flex gap-2">

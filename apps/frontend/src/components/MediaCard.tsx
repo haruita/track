@@ -54,10 +54,6 @@ export function MediaCard({ media, isLogged, isInMyList, onAddToList }: Props) {
           <strong>Type:</strong> {formatType(media.type)}
         </p>
 
-        <p className="card-text">
-          <strong>Status:</strong> {formatType(media.status)}
-        </p>
-
         {media.description && (
           <p className="card-text text-muted" style={{ fontSize: "0.875rem" }}>
             {media.description.length > 100
