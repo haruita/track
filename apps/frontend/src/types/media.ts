@@ -4,9 +4,16 @@ export type Media = {
   type: string;
   activity: string;
   status: string;
-  progressCurrent: number;
   progressTotal?: number;
   progressUnit: string;
   description?: string;
   imageUrl?: string;
+};
+
+export type UserMedia = {
+  id: string;
+  userId: string;
+  mediaId: string;
+  progressCurrent: number;
+  media: Media;
 };

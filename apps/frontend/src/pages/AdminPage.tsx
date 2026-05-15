@@ -10,7 +10,6 @@ export function AdminPage() {
   const [type, setType] = useState("anime");
   const [activity, setActivity] = useState("watch");
   const [status, setStatus] = useState("watching");
-  const [progressCurrent, setProgressCurrent] = useState(0);
   const [progressTotal, setProgressTotal] = useState(12);
   const [progressUnit, setProgressUnit] = useState("episode");
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -34,7 +33,6 @@ export function AdminPage() {
     formData.append("type", type);
     formData.append("activity", activity);
     formData.append("status", status);
-    formData.append("progressCurrent", String(progressCurrent));
     formData.append("progressTotal", String(progressTotal));
     formData.append("progressUnit", progressUnit);
     formData.append("description", description);
@@ -74,7 +72,6 @@ export function AdminPage() {
     setType(item.type);
     setActivity(item.activity);
     setStatus(item.status);
-    setProgressCurrent(item.progressCurrent);
     setProgressTotal(item.progressTotal ?? 0);
     setProgressUnit(item.progressUnit);
     setDescription(item.description ?? "");
@@ -89,7 +86,6 @@ export function AdminPage() {
     setType("anime");
     setActivity("watch");
     setStatus("watching");
-    setProgressCurrent(0);
     setProgressTotal(12);
     setProgressUnit("episode");
     setDescription("");
@@ -172,14 +168,6 @@ export function AdminPage() {
         <input
           type="number"
           className="form-control mb-3"
-          placeholder="Current"
-          value={progressCurrent}
-          onChange={(e) => setProgressCurrent(Number(e.target.value))}
-        />
-
-        <input
-          type="number"
-          className="form-control mb-3"
           placeholder="Total"
           value={progressTotal}
           onChange={(e) => setProgressTotal(Number(e.target.value))}
@@ -239,7 +227,7 @@ export function AdminPage() {
                 <th>Title</th>
                 <th>Type</th>
                 <th>Status</th>
-                <th>Progress</th>
+                <th>Total</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -251,8 +239,7 @@ export function AdminPage() {
                   <td>{formatType(item.type)}</td>
                   <td>{formatType(item.status)}</td>
                   <td>
-                    {item.progressCurrent}/{item.progressTotal}{" "}
-                    {item.progressUnit}
+                    {item.progressTotal ?? "—"} {item.progressTotal ? formatType(item.progressUnit) : ""}
                   </td>
                   <td>
                     <div className="d-flex gap-2">

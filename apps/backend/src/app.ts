@@ -9,7 +9,7 @@ export const app = express();
 
 app.use(cors());
 app.use(express.json());
-app.use("/uploads", express.static(path.join(__dirname, "../../uploads")));
+app.use("/uploads", express.static(path.resolve(process.cwd(), "uploads")));
 app.use("/media", mediaRouter);
 app.use("/auth", authRouter);
 app.use("/users", userRouter);

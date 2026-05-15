@@ -20,15 +20,34 @@ export function RegisterModal({
     const [username, setUsername] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
 
     async function handleRegister() {
-        await api.post("/register", {
-            username,
-            email,
-            password,
-        });
+        try {
+            setLoading(true);
+            setError("");
 
-        onHide();
+            await api.post("/auth/register", {
+                username,
+                email,
+                password,
+            });
+
+            const response = await api.post("/auth/login", {
+                email,
+                password,
+            });
+
+            localStorage.setItem("token", response.data.token);
+
+            onHide();
+            window.location.reload();
+        } catch (err: any) {
+            setError(err?.response?.data?.message || "Could not register user.");
+        } finally {
+            setLoading(false);
+        }
     }
 
     return (
@@ -40,6 +59,12 @@ export function RegisterModal({
             </Modal.Header>
 
             <Modal.Body>
+                {error && (
+                    <div className="alert alert-danger">
+                        {error}
+                    </div>
+                )}
+
                 <Form>
                     <Form.Group className="mb-3">
                         <Form.Label>Username</Form.Label>
@@ -56,6 +81,7 @@ export function RegisterModal({
                         <Form.Label>Email</Form.Label>
 
                         <Form.Control
+                            type="email"
                             value={email}
                             onChange={(e) =>
                                 setEmail(e.target.value)
@@ -78,8 +104,19 @@ export function RegisterModal({
             </Modal.Body>
 
             <Modal.Footer>
-                <Button onClick={handleRegister}>
-                    Register
+                <Button
+                    variant="secondary"
+                    onClick={onHide}
+                >
+                    Cancel
+                </Button>
+
+                <Button
+                    variant="primary"
+                    onClick={handleRegister}
+                    disabled={loading}
+                >
+                    {loading ? "Registering..." : "Register"}
                 </Button>
             </Modal.Footer>
         </Modal>

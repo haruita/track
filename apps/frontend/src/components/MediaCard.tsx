@@ -5,9 +5,12 @@ import { resolveImageUrl } from "../utils/resolveImageUrl";
 
 type Props = {
   media: Media;
+  isLogged?: boolean;
+  isInMyList?: boolean;
+  onAddToList?: () => void;
 };
 
-export function MediaCard({ media }: Props) {
+export function MediaCard({ media, isLogged, isInMyList, onAddToList }: Props) {
   return (
     <div className="card h-100 shadow-sm">
       <div
@@ -55,11 +58,6 @@ export function MediaCard({ media }: Props) {
           <strong>Status:</strong> {formatType(media.status)}
         </p>
 
-        <p className="card-text">
-          <strong>Progress:</strong> {media.progressCurrent}/{media.progressTotal}{" "}
-          {formatType(media.progressUnit)}
-        </p>
-
         {media.description && (
           <p className="card-text text-muted" style={{ fontSize: "0.875rem" }}>
             {media.description.length > 100
@@ -68,9 +66,21 @@ export function MediaCard({ media }: Props) {
           </p>
         )}
 
-        <Link to={`/media/${media.id}`} className="btn btn-primary">
-          Details
-        </Link>
+        <div className="d-flex gap-2 flex-wrap">
+          <Link to={`/media/${media.id}`} className="btn btn-primary">
+            Details
+          </Link>
+
+          {isLogged && isInMyList && (
+            <span className="badge bg-success align-self-center">✓ In my list</span>
+          )}
+
+          {isLogged && !isInMyList && onAddToList && (
+            <button className="btn btn-outline-success" onClick={onAddToList}>
+              Add to list
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

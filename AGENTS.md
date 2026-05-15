@@ -26,9 +26,11 @@ Root-level `pnpm dev` → backend, `pnpm test` / `pnpm test:watch` → domain. U
 - Routes: `/auth`, `/users`, `/media`
 - Prisma: `apps/backend/prisma/schema.prisma` (SQLite, `dev.db`)
 - Env: `apps/backend/.env` — `DATABASE_URL` and `JWT_SECRET`
-- After schema changes: `npx prisma generate` then `npx prisma migrate dev`
+- After schema changes: `npx prisma db push --accept-data-loss` (interactive migrate not supported in this env)
 - Custom types: `apps/backend/src/types/` (via `typeRoots` in tsconfig)
 - JWT payload includes `role` as **uppercase** Prisma enum value (`"ADMIN"`, `"USER"`)
+- File uploads: `multer` saves to `apps/backend/uploads/`, served via `/uploads` static route
+- **UserMedia model** tracks per-user progress. `Media` has no `progressCurrent` — that lives in `UserMedia`. Each user adds media to their list via `POST /users/me/media/:mediaId`, then manages progress via `PATCH /users/me/media/:userMediaId/progress`
 
 ## Domain Layer
 

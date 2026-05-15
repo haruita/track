@@ -6,7 +6,16 @@ import { upload } from "../middleware/upload";
 
 export const mediaRouter = Router();
 
-mediaRouter.get("/", async (_req, res) => {
+mediaRouter.get("/", async (req, res) => {
+  const query = req.query.q as string | undefined;
+
+  if (query) {
+    const media = await prisma.media.findMany({
+      where: { title: { contains: query } },
+    });
+    return res.json(media);
+  }
+
   const media = await prisma.media.findMany();
   res.json(media);
 });
@@ -36,7 +45,6 @@ mediaRouter.post(
       type,
       activity,
       status,
-      progressCurrent,
       progressTotal,
       progressUnit,
       description,
@@ -52,7 +60,6 @@ mediaRouter.post(
         type,
         activity,
         status,
-        progressCurrent: Number(progressCurrent),
         progressTotal: progressTotal ? Number(progressTotal) : undefined,
         progressUnit,
         description: description || undefined,
@@ -77,7 +84,6 @@ mediaRouter.put(
       type,
       activity,
       status,
-      progressCurrent,
       progressTotal,
       progressUnit,
       description,
@@ -94,7 +100,6 @@ mediaRouter.put(
         type,
         activity,
         status,
-        progressCurrent: Number(progressCurrent),
         progressTotal: progressTotal ? Number(progressTotal) : undefined,
         progressUnit,
         description: description || undefined,

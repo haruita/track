@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { api } from "../api/client";
-import type { Media } from "../types/media";
+import type { Media, UserMedia } from "../types/media";
 import { formatType } from "../utils/formatType";
 import { resolveImageUrl } from "../utils/resolveImageUrl";
 
@@ -9,6 +9,8 @@ export function MediaDetailsPage() {
   const { id } = useParams();
 
   const [media, setMedia] = useState<Media | null>(null);
+  const [userMedia, setUserMedia] = useState<UserMedia | null>(null);
+  const [isLogged, setIsLogged] = useState(false);
 
   const [loading, setLoading] = useState(true);
 
@@ -17,7 +19,6 @@ export function MediaDetailsPage() {
   async function loadMedia() {
     try {
       const response = await api.get(`/media/${id}`);
-
       setMedia(response.data);
     } catch {
       setError("Media not found");
@@ -26,8 +27,56 @@ export function MediaDetailsPage() {
     }
   }
 
+  async function loadMyMedia() {
+    try {
+      const response = await api.get("/users/me/media");
+      const found = (response.data as UserMedia[]).find(
+        (um) => um.mediaId === id
+      );
+      setUserMedia(found ?? null);
+    } catch {
+      setUserMedia(null);
+    }
+  }
+
+  async function handleAddToList() {
+    if (!id) return;
+    try {
+      const response = await api.post(`/users/me/media/${id}`);
+      setUserMedia(response.data);
+    } catch {
+      console.error("Failed to add to list");
+    }
+  }
+
+  async function handleRemoveFromList() {
+    if (!userMedia) return;
+    try {
+      await api.delete(`/users/me/media/${userMedia.id}`);
+      setUserMedia(null);
+    } catch {
+      console.error("Failed to remove from list");
+    }
+  }
+
+  async function updateProgress(action: "increment" | "decrement" | "set", value?: number) {
+    if (!userMedia) return;
+    try {
+      const response = await api.patch(`/users/me/media/${userMedia.id}/progress`, {
+        action,
+        value,
+      });
+      setUserMedia(response.data);
+    } catch {
+      console.error("Failed to update progress");
+    }
+  }
+
   useEffect(() => {
+    const logged = !!localStorage.getItem("token");
+    setIsLogged(logged);
     loadMedia();
+    if (logged) loadMyMedia();
   }, [id]);
 
   if (loading) {
@@ -47,6 +96,8 @@ export function MediaDetailsPage() {
       </div>
     );
   }
+
+  const total = media.progressTotal ?? 0;
 
   return (
     <div className="container py-4">
@@ -89,14 +140,60 @@ export function MediaDetailsPage() {
           </p>
 
           <p>
-            <strong>Progress:</strong> {media.progressCurrent}/{media.progressTotal}{" "}
-            {formatType(media.progressUnit)}
+            <strong>Total:</strong> {total} {formatType(media.progressUnit)}
           </p>
 
           {media.description && (
             <p>
               <strong>Description:</strong> {media.description}
             </p>
+          )}
+
+          {isLogged && userMedia && (
+            <div className="mt-3 p-3 border rounded">
+              <h5 className="mb-2">My Progress</h5>
+              <div className="d-flex align-items-center gap-2">
+                <button
+                  className="btn btn-sm btn-outline-secondary"
+                  disabled={userMedia.progressCurrent <= 0}
+                  onClick={() => updateProgress("decrement")}
+                >
+                  −
+                </button>
+                <input
+                  type="number"
+                  className="form-control form-control-sm"
+                  style={{ width: "80px" }}
+                  value={userMedia.progressCurrent}
+                  min={0}
+                  max={total}
+                  onChange={(e) => {
+                    const val = Number(e.target.value);
+                    if (!isNaN(val)) updateProgress("set", val);
+                  }}
+                />
+                <span className="text-muted">/ {total}</span>
+                <button
+                  className="btn btn-sm btn-outline-secondary"
+                  disabled={userMedia.progressCurrent >= total}
+                  onClick={() => updateProgress("increment")}
+                >
+                  +
+                </button>
+              </div>
+              <button
+                className="btn btn-sm btn-outline-danger mt-2"
+                onClick={handleRemoveFromList}
+              >
+                Remove from my list
+              </button>
+            </div>
+          )}
+
+          {isLogged && !userMedia && (
+            <button className="btn btn-success mt-3" onClick={handleAddToList}>
+              Add to my list
+            </button>
           )}
         </div>
       </div>

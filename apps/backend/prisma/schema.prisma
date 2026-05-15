@@ -21,6 +21,10 @@ model User {
   passwordHash String
 
   role         Role @default(USER)
+
+  avatarUrl    String?
+
+  userMedias   UserMedia[]
 }
 
 model Media {
@@ -33,11 +37,23 @@ model Media {
   activity String
   status String
 
-  progressCurrent Int
   progressTotal Int?
-
   progressUnit String
 
   description String?
   imageUrl String?
+
+  userMedias UserMedia[]
+}
+
+model UserMedia {
+  id              String @id @default(cuid())
+  userId          String
+  mediaId         String
+  progressCurrent Int    @default(0)
+
+  user   User  @relation(fields: [userId], references: [id])
+  media  Media @relation(fields: [mediaId], references: [id])
+
+  @@unique([userId, mediaId])
 }
