@@ -1,9 +1,11 @@
 import { expect, test, describe, vi, beforeEach } from "vitest";
 import { RegisterUserUseCase } from "./register-user";
 import type { UserRepository } from "../repositories/UserRepository";
+import type { PasswordHasher } from "../repositories/PasswordHasher";
 
 describe("RegisterUserUseCase", () => {
   let userRepository: UserRepository;
+  let passwordHasher: PasswordHasher;
   let useCase: RegisterUserUseCase;
 
   beforeEach(() => {
@@ -13,10 +15,14 @@ describe("RegisterUserUseCase", () => {
       findById: vi.fn(),
       list: vi.fn(),
     };
-    useCase = new RegisterUserUseCase(userRepository);
+    passwordHasher = {
+      hash: vi.fn(),
+      compare: vi.fn(),
+    };
+    useCase = new RegisterUserUseCase(userRepository, passwordHasher);
   });
 
-  test("should hash the password before passing it to the repository", async () => {
+  test("should hash the password using the injected hasher before passing it to the repository", async () => {
     const createdUser = {
       id: "1",
       username: "testuser",
@@ -25,6 +31,7 @@ describe("RegisterUserUseCase", () => {
       role: "USER",
     };
 
+    vi.mocked(passwordHasher.hash).mockResolvedValue("$2a$10$hashed");
     vi.mocked(userRepository.create).mockResolvedValue(createdUser);
 
     await useCase.execute({
@@ -33,10 +40,8 @@ describe("RegisterUserUseCase", () => {
       password: "secret123",
     });
 
-    const callArg = vi.mocked(userRepository.create).mock.calls[0][0];
-    expect(callArg.passwordHash).not.toBe("secret123");
-    expect(typeof callArg.passwordHash).toBe("string");
-    expect(callArg.passwordHash.length).toBeGreaterThan(10);
+    expect(passwordHasher.hash).toHaveBeenCalledWith("secret123");
+    expect(passwordHasher.hash).toHaveBeenCalledTimes(1);
   });
 
   test("should assign USER role by default regardless of input", async () => {
@@ -48,6 +53,7 @@ describe("RegisterUserUseCase", () => {
       role: "USER",
     };
 
+    vi.mocked(passwordHasher.hash).mockResolvedValue("$2a$10$hashed");
     vi.mocked(userRepository.create).mockResolvedValue(createdUser);
 
     const result = await useCase.execute({
@@ -68,6 +74,7 @@ describe("RegisterUserUseCase", () => {
       role: "USER",
     };
 
+    vi.mocked(passwordHasher.hash).mockResolvedValue("$2a$10$hashed");
     vi.mocked(userRepository.create).mockResolvedValue(createdUser);
 
     const result = await useCase.execute({
@@ -88,6 +95,7 @@ describe("RegisterUserUseCase", () => {
       role: "USER",
     };
 
+    vi.mocked(passwordHasher.hash).mockResolvedValue("$2a$10$hashed");
     vi.mocked(userRepository.create).mockResolvedValue(createdUser);
 
     await useCase.execute({
@@ -106,6 +114,7 @@ describe("RegisterUserUseCase", () => {
   });
 
   test("should throw if repository.create fails", async () => {
+    vi.mocked(passwordHasher.hash).mockResolvedValue("$2a$10$hashed");
     vi.mocked(userRepository.create).mockRejectedValue(
       new Error("Unique constraint failed on email")
     );
@@ -117,5 +126,19 @@ describe("RegisterUserUseCase", () => {
         password: "secret123",
       })
     ).rejects.toThrow("Unique constraint failed on email");
+  });
+
+  test("should throw if password hasher fails", async () => {
+    vi.mocked(passwordHasher.hash).mockRejectedValue(
+      new Error("Hashing failed")
+    );
+
+    await expect(
+      useCase.execute({
+        username: "testuser",
+        email: "test@test.com",
+        password: "secret123",
+      })
+    ).rejects.toThrow("Hashing failed");
   });
 });

@@ -27,6 +27,9 @@ RUN pnpm install --frozen-lockfile
 # Copy backend source
 COPY apps/backend/ apps/backend/
 
+# Copy domain source (imported by backend)
+COPY domain/ domain/
+
 # Ensure uploads directory exists (cover images for seed if present)
 RUN mkdir -p apps/backend/uploads
 

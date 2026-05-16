@@ -1,30 +1,24 @@
 import { Router } from "express";
-
-import { registerUser } from "../use-cases/register-user";
-import { loginUser } from "../use-cases/login-user";
+import { registerUserUseCase, loginUserUseCase } from "../container";
+import { generateToken } from "../auth/jwt";
 
 export const authRouter = Router();
 
 authRouter.post("/register", async (req, res) => {
   try {
-    const user = await registerUser(req.body);
-
+    const user = await registerUserUseCase.execute(req.body);
     res.json(user);
   } catch {
-    res.status(400).json({
-      message: "Could not register user.",
-    });
+    res.status(400).json({ message: "Could not register user." });
   }
 });
 
 authRouter.post("/login", async (req, res) => {
   try {
-    const token = await loginUser(req.body);
-
+    const user = await loginUserUseCase.execute(req.body);
+    const token = generateToken({ id: user.id, role: user.role });
     res.json({ token });
   } catch {
-    res.status(401).json({
-      message: "Invalid credentials.",
-    });
+    res.status(401).json({ message: "Invalid credentials." });
   }
 });

@@ -1,4 +1,4 @@
-import { expect, test, describe, beforeEach, afterEach } from "vitest";
+import { expect, test, describe, vi, beforeEach, afterEach } from "vitest";
 
 describe("jwt", () => {
   const originalSecret = process.env.JWT_SECRET;

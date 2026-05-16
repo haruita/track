@@ -13,13 +13,9 @@
   "license": "ISC",
   "packageManager": "pnpm@10.32.1",
   "devDependencies": {
-    "@types/bcryptjs": "^3.0.0",
     "@types/node": "^25.5.2",
     "tsx": "^4.21.0",
     "typescript": "^6.0.2",
     "vitest": "^4.1.4"
-  },
-  "dependencies": {
-    "bcryptjs": "^3.0.3"
   }
 }

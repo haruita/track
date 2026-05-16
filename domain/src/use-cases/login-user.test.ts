@@ -1,10 +1,11 @@
 import { expect, test, describe, vi, beforeEach } from "vitest";
 import { LoginUserUseCase } from "./login-user";
 import type { UserRepository } from "../repositories/UserRepository";
-import bcrypt from "bcryptjs";
+import type { PasswordHasher } from "../repositories/PasswordHasher";
 
 describe("LoginUserUseCase", () => {
   let userRepository: UserRepository;
+  let passwordHasher: PasswordHasher;
   let useCase: LoginUserUseCase;
 
   beforeEach(() => {
@@ -14,7 +15,11 @@ describe("LoginUserUseCase", () => {
       findById: vi.fn(),
       list: vi.fn(),
     };
-    useCase = new LoginUserUseCase(userRepository);
+    passwordHasher = {
+      hash: vi.fn(),
+      compare: vi.fn(),
+    };
+    useCase = new LoginUserUseCase(userRepository, passwordHasher);
   });
 
   test("should throw 'Invalid credentials' when user does not exist", async () => {
@@ -28,16 +33,17 @@ describe("LoginUserUseCase", () => {
     ).rejects.toThrow("Invalid credentials");
   });
 
-  test("should throw 'Invalid credentials' when password is wrong", async () => {
+  test("should throw 'Invalid credentials' when password comparison fails", async () => {
     const user = {
       id: "1",
       username: "testuser",
       email: "test@test.com",
-      passwordHash: await bcrypt.hash("correct-password", 10),
+      passwordHash: "$2a$10$hashed",
       role: "USER",
     };
 
     vi.mocked(userRepository.findByEmail).mockResolvedValue(user);
+    vi.mocked(passwordHasher.compare).mockResolvedValue(false);
 
     await expect(
       useCase.execute({
@@ -52,11 +58,12 @@ describe("LoginUserUseCase", () => {
       id: "1",
       username: "testuser",
       email: "test@test.com",
-      passwordHash: await bcrypt.hash("correct-password", 10),
+      passwordHash: "$2a$10$hashed",
       role: "USER",
     };
 
     vi.mocked(userRepository.findByEmail).mockResolvedValue(user);
+    vi.mocked(passwordHasher.compare).mockResolvedValue(false);
 
     await expect(
       useCase.execute({
@@ -66,16 +73,17 @@ describe("LoginUserUseCase", () => {
     ).rejects.toThrow("Invalid credentials");
   });
 
-  test("should return user when email and password are correct", async () => {
+  test("should return user when credentials are valid", async () => {
     const user = {
       id: "user-123",
       username: "testuser",
       email: "test@test.com",
-      passwordHash: await bcrypt.hash("correct-password", 10),
+      passwordHash: "$2a$10$hashed",
       role: "USER",
     };
 
     vi.mocked(userRepository.findByEmail).mockResolvedValue(user);
+    vi.mocked(passwordHasher.compare).mockResolvedValue(true);
 
     const result = await useCase.execute({
       email: "test@test.com",
@@ -90,11 +98,12 @@ describe("LoginUserUseCase", () => {
       id: "1",
       username: "testuser",
       email: "test@test.com",
-      passwordHash: await bcrypt.hash("password", 10),
+      passwordHash: "$2a$10$hashed",
       role: "USER",
     };
 
     vi.mocked(userRepository.findByEmail).mockResolvedValue(user);
+    vi.mocked(passwordHasher.compare).mockResolvedValue(true);
 
     await useCase.execute({
       email: "test@test.com",
@@ -104,16 +113,37 @@ describe("LoginUserUseCase", () => {
     expect(userRepository.findByEmail).toHaveBeenCalledWith("test@test.com");
   });
 
+  test("should use injected passwordHasher.compare for verification", async () => {
+    const user = {
+      id: "1",
+      username: "testuser",
+      email: "test@test.com",
+      passwordHash: "$2a$10$hashed",
+      role: "USER",
+    };
+
+    vi.mocked(userRepository.findByEmail).mockResolvedValue(user);
+    vi.mocked(passwordHasher.compare).mockResolvedValue(true);
+
+    await useCase.execute({
+      email: "test@test.com",
+      password: "password",
+    });
+
+    expect(passwordHasher.compare).toHaveBeenCalledWith("password", "$2a$10$hashed");
+  });
+
   test("should not call create, findById or list during login", async () => {
     const user = {
       id: "1",
       username: "testuser",
       email: "test@test.com",
-      passwordHash: await bcrypt.hash("password", 10),
+      passwordHash: "$2a$10$hashed",
       role: "USER",
     };
 
     vi.mocked(userRepository.findByEmail).mockResolvedValue(user);
+    vi.mocked(passwordHasher.compare).mockResolvedValue(true);
 
     await useCase.execute({
       email: "test@test.com",
