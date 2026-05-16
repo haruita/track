@@ -27,8 +27,8 @@ RUN pnpm install --frozen-lockfile
 # Copy backend source
 COPY apps/backend/ apps/backend/
 
-# Copy uploads (cover images for seed)
-COPY apps/backend/uploads/ apps/backend/uploads/
+# Ensure uploads directory exists (cover images for seed if present)
+RUN mkdir -p apps/backend/uploads
 
 # Generate Prisma Client
 RUN npx prisma generate --schema=apps/backend/prisma/schema.prisma
