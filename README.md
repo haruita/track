@@ -12,43 +12,24 @@ Aplicación web para llevar un registro personal de progreso en medios como anim
 
 ## Prerrequisitos
 
-1. Node.js 22+ y pnpm 10+
-2. Docker y Docker Compose (opcional)
+1. Node.js
+2. pnpm
+3. Docker/Docker Compose
 
 ## Instalación
 
-### Opción A: Local
+1. **Cloná el repositorio:**
+    ```bash
+    https://github.com/haruita/track.git
+    cd track
+    ```
 
-1. **Instalá las dependencias:**
+2. **Instalá las dependencias:**
     ```bash
     pnpm install
     ```
 
-2. **Configurá las variables de entorno:**
-    Creá `apps/backend/.env`:
-    ```env
-    DATABASE_URL="file:./dev.db"
-    JWT_SECRET="tu-secreto-aqui"
-    ```
-
-3. **Inicializá la base de datos:**
-    ```bash
-    cd apps/backend
-    npx prisma db push --accept-data-loss
-    npx tsx prisma/seed.ts
-    cd ../..
-    ```
-
-4. **Levantá la aplicación:**
-    ```bash
-    pnpm dev
-    ```
-
-El frontend estará en `http://localhost:5173` y la API en `http://localhost:3000`.
-
-### Opción B: Docker
-
-1. **Construí y levantá todo:**
+3. **Construí y levantá todo:**
     ```bash
     pnpm docker:up
     ```
@@ -91,7 +72,7 @@ pnpm test:backend      # Solo Backend
 |--------|------|-------------|
 | `POST` | `/auth/register` | Registrar usuario |
 | `POST` | `/auth/login` | Iniciar sesión (devuelve JWT) |
-| `GET` | `/media` | Listar catálogo (`?q=` para buscar) |
+| `GET` | `/media` | Listar catálogo |
 | `GET` | `/media/:id` | Detalle de un medio |
 | `POST` | `/media` | Crear medio (ADMIN) |
 | `PUT` | `/media/:id` | Editar medio (ADMIN) |
