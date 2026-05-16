@@ -12,31 +12,46 @@ Aplicación web para llevar un registro personal de progreso en medios como anim
 
 ## Prerrequisitos
 
-1. Node.js (versión 18 o superior recomendada)
-2. Docker y Docker Compose
+1. Node.js 22+ y pnpm 10+
+2. Docker y Docker Compose (opcional)
 
 ## Instalación
 
-1.  **Cloná el repositorio:**
+### Opción A: Local
+
+1. **Instalá las dependencias:**
     ```bash
-    git clone "https://github.com/haruita/track.git"
-    cd "track"
+    pnpm install
     ```
 
-2.  **Instalá todas las dependencias:**
-    Desde la raíz del proyecto, ejecutá el script que instala dependencias tanto para el frontend como para el backend:
-    ```bash
-    pnpm run install:all
-    ```
-    *(Nota: Este script debe estar definido en el package.json de la raíz).*
-
-3.  **Iniciá ambos servidores simultáneamente:**
-    Ejecutá el siguiente comando en la raíz para levantar el frontend (Vite) y el backend (Express) al mismo tiempo:
-    ```bash
-    pnpm run dev
+2. **Configurá las variables de entorno:**
+    Creá `apps/backend/.env`:
+    ```env
+    DATABASE_URL="file:./dev.db"
+    JWT_SECRET="tu-secreto-aqui"
     ```
 
-La aplicación frontend estará disponible en http://localhost:5173 y la API backend en http://localhost:3000.
+3. **Inicializá la base de datos:**
+    ```bash
+    cd apps/backend
+    npx prisma db push --accept-data-loss
+    npx tsx prisma/seed.ts
+    cd ../..
+    ```
+
+4. **Levantá la aplicación:**
+    ```bash
+    pnpm dev
+    ```
+
+El frontend estará en `http://localhost:5173` y la API en `http://localhost:3000`.
+
+### Opción B: Docker
+
+1. **Construí y levantá todo:**
+    ```bash
+    pnpm docker:up
+    ```
 
 Disponible en `http://localhost:3000`. Los datos persisten en volúmenes `db-data` y `uploads-data`.
 
@@ -60,15 +75,14 @@ Disponible en `http://localhost:3000`. Los datos persisten en volúmenes `db-dat
 1. Iniciar sesión con la cuenta de administrador
 2. Acceder al **Admin Panel** para crear, editar o eliminar entradas del catálogo
 3. Cada entrada incluye: título, tipo, actividad, estado, unidad de progreso, total, imagen y descripción
-```
 
 ## Tests
 
 ```bash
 pnpm test              # Dominio
 pnpm test:watch        # Dominio (watch)
-pnpm --dir apps/backend test          # Backend
-pnpm --dir apps/backend test:watch    # Backend (watch)
+pnpm test:all          # Dominio + Backend
+pnpm test:backend      # Solo Backend
 ```
 
 ## Endpoints

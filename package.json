@@ -4,9 +4,17 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "pnpm --dir apps/backend dev",
+    "dev": "concurrently \"pnpm --dir apps/backend dev\" \"pnpm --dir apps/frontend dev\"",
+    "dev:backend": "pnpm --dir apps/backend dev",
+    "dev:frontend": "pnpm --dir apps/frontend dev",
+    "docker:up": "docker compose up --build -d",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f",
+    "docker:rebuild": "docker compose down -v && docker compose up --build -d",
     "test": "pnpm --dir domain test",
-    "test:watch": "pnpm --dir domain test:watch"
+    "test:watch": "pnpm --dir domain test:watch",
+    "test:backend": "pnpm --dir apps/backend test",
+    "test:all": "pnpm test && pnpm test:backend"
   },
   "keywords": [],
   "author": "",
@@ -18,6 +26,7 @@
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^25.5.2",
+    "concurrently": "^9.2.1",
     "prisma": "^6.19.3",
     "tsx": "^4.21.0",
     "typescript": "^6.0.2",
