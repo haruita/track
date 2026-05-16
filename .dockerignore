@@ -3,5 +3,4 @@ dist
 .git
 *.db
 .env
-uploads
 .DS_Store
