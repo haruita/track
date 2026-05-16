@@ -3,7 +3,7 @@ import { isCompleted } from "./is-completed";
 import type { Anime, Game, Book } from "../entities/media/media.types";
 
 describe("isCompleted", () => {
-  test("returns false when progress current is less than total", () => {
+  test("should return false when current progress is less than total", () => {
     const anime: Anime = {
       id: "1",
       title: "Shangri-La Frontier",
@@ -20,13 +20,13 @@ describe("isCompleted", () => {
     expect(isCompleted(anime)).toBe(false);
   });
 
-  test("returns true when progress current equals total", () => {
+  test("should return true when current progress equals total", () => {
     const anime: Anime = {
       id: "1",
       title: "Steins;Gate",
       type: "anime",
       activity: "watch",
-      status: "completed",
+      status: "watching",
       progress: {
         current: 24,
         total: 24,
@@ -37,13 +37,13 @@ describe("isCompleted", () => {
     expect(isCompleted(anime)).toBe(true);
   });
 
-  test("returns true when progress current exceeds total", () => {
+  test("should return true when current progress exceeds total", () => {
     const anime: Anime = {
       id: "1",
       title: "Test Anime",
       type: "anime",
       activity: "watch",
-      status: "completed",
+      status: "watching",
       progress: {
         current: 30,
         total: 24,
@@ -54,7 +54,7 @@ describe("isCompleted", () => {
     expect(isCompleted(anime)).toBe(true);
   });
 
-  test("returns false when total is undefined", () => {
+  test("should return false when total is undefined (open-ended media)", () => {
     const game: Game = {
       id: "1",
       title: "Test Game",
@@ -70,7 +70,7 @@ describe("isCompleted", () => {
     expect(isCompleted(game)).toBe(false);
   });
 
-  test("returns false when current is 0", () => {
+  test("should return false when current is 0 and total is defined", () => {
     const anime: Anime = {
       id: "1",
       title: "Test Anime",
@@ -87,13 +87,13 @@ describe("isCompleted", () => {
     expect(isCompleted(anime)).toBe(false);
   });
 
-  test("works with books using page unit", () => {
+  test("should work with books using page unit", () => {
     const book: Book = {
       id: "1",
       title: "Test Book",
       type: "book",
       activity: "read",
-      status: "completed",
+      status: "reading",
       progress: {
         current: 300,
         total: 300,
@@ -104,13 +104,13 @@ describe("isCompleted", () => {
     expect(isCompleted(book)).toBe(true);
   });
 
-  test("works with games using hour unit", () => {
+  test("should work with games using hour unit", () => {
     const game: Game = {
       id: "1",
       title: "NieR: Automata",
       type: "game",
       activity: "play",
-      status: "completed",
+      status: "playing",
       progress: {
         current: 60,
         total: 60,
@@ -119,5 +119,22 @@ describe("isCompleted", () => {
     };
 
     expect(isCompleted(game)).toBe(true);
+  });
+
+  test("should return false when total is 0 (falsy value treated as undefined)", () => {
+    const anime: Anime = {
+      id: "1",
+      title: "Test Anime",
+      type: "anime",
+      activity: "watch",
+      status: "watching",
+      progress: {
+        current: 0,
+        total: 0,
+        unit: "episode",
+      },
+    };
+
+    expect(isCompleted(anime)).toBe(false);
   });
 });

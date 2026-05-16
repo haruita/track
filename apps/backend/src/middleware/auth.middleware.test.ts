@@ -6,7 +6,7 @@ describe("authMiddleware", () => {
     vi.resetModules();
   });
 
-  test("returns 401 when no authorization header", async () => {
+  test("should return 401 when authorization header is missing", async () => {
     const { authMiddleware } = await import("./auth.middleware");
 
     const req = { headers: {} } as any;
@@ -20,7 +20,20 @@ describe("authMiddleware", () => {
     expect(next).not.toHaveBeenCalled();
   });
 
-  test("returns 401 when authorization header has no token", async () => {
+  test("should return 401 when authorization header is empty", async () => {
+    const { authMiddleware } = await import("./auth.middleware");
+
+    const req = { headers: { authorization: "" } } as any;
+    const res = { status: vi.fn().mockReturnThis(), json: vi.fn() };
+    const next = vi.fn();
+
+    authMiddleware(req, res, next);
+
+    expect(res.status).toHaveBeenCalledWith(401);
+    expect(next).not.toHaveBeenCalled();
+  });
+
+  test("should return 401 when authorization header has no token after Bearer", async () => {
     const { authMiddleware } = await import("./auth.middleware");
 
     const req = { headers: { authorization: "Bearer" } } as any;
@@ -33,10 +46,10 @@ describe("authMiddleware", () => {
     expect(next).not.toHaveBeenCalled();
   });
 
-  test("returns 401 when token is invalid", async () => {
+  test("should return 401 when token is invalid", async () => {
     const { authMiddleware } = await import("./auth.middleware");
 
-    const req = { headers: { authorization: "Bearer invalid-token" } } as any;
+    const req = { headers: { authorization: "Bearer not-a-real-token" } } as any;
     const res = { status: vi.fn().mockReturnThis(), json: vi.fn() };
     const next = vi.fn();
 
@@ -47,7 +60,7 @@ describe("authMiddleware", () => {
     expect(next).not.toHaveBeenCalled();
   });
 
-  test("calls next and sets req.user when token is valid", async () => {
+  test("should call next and attach decoded user to request when token is valid", async () => {
     const { authMiddleware } = await import("./auth.middleware");
     const { generateToken } = await import("../auth/jwt");
 
@@ -64,7 +77,7 @@ describe("authMiddleware", () => {
     );
   });
 
-  test("extracts admin role correctly", async () => {
+  test("should correctly decode admin role from token", async () => {
     const { authMiddleware } = await import("./auth.middleware");
     const { generateToken } = await import("../auth/jwt");
 
@@ -77,5 +90,19 @@ describe("authMiddleware", () => {
 
     expect(next).toHaveBeenCalled();
     expect(req.user.role).toBe("ADMIN");
+  });
+
+  test("should not call res.json when token is valid", async () => {
+    const { authMiddleware } = await import("./auth.middleware");
+    const { generateToken } = await import("../auth/jwt");
+
+    const token = generateToken({ id: "user-1", role: "USER" });
+    const req = { headers: { authorization: `Bearer ${token}` } } as any;
+    const res = { status: vi.fn().mockReturnThis(), json: vi.fn() };
+    const next = vi.fn();
+
+    authMiddleware(req, res, next);
+
+    expect(res.json).not.toHaveBeenCalled();
   });
 });

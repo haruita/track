@@ -3,7 +3,7 @@ import { startMedia } from "./start-media";
 import type { Anime, Game, Album, Book } from "../entities/media/media.types";
 
 describe("startMedia", () => {
-  test("transitions anime from planned to watching", () => {
+  test("should transition anime from 'planned' to 'watching'", () => {
     const anime: Anime = {
       id: "1",
       title: "Test Anime",
@@ -22,7 +22,7 @@ describe("startMedia", () => {
     expect(result!.status).toBe("watching");
   });
 
-  test("transitions game from planned to playing", () => {
+  test("should transition game from 'planned' to 'playing'", () => {
     const game: Game = {
       id: "1",
       title: "Test Game",
@@ -40,7 +40,7 @@ describe("startMedia", () => {
     expect(result!.status).toBe("playing");
   });
 
-  test("transitions album from planned to listening", () => {
+  test("should transition album from 'planned' to 'listening'", () => {
     const album: Album = {
       id: "1",
       title: "Test Album",
@@ -58,7 +58,7 @@ describe("startMedia", () => {
     expect(result!.status).toBe("listening");
   });
 
-  test("transitions book from planned to reading", () => {
+  test("should transition book from 'planned' to 'reading'", () => {
     const book: Book = {
       id: "1",
       title: "Test Book",
@@ -76,7 +76,7 @@ describe("startMedia", () => {
     expect(result!.status).toBe("reading");
   });
 
-  test("returns same media if status is not planned", () => {
+  test("should return the same reference when status is not 'planned'", () => {
     const anime: Anime = {
       id: "1",
       title: "Test Anime",
@@ -93,10 +93,9 @@ describe("startMedia", () => {
     const result = startMedia(anime);
 
     expect(result).toBe(anime);
-    expect(result!.status).toBe("watching");
   });
 
-  test("returns same media if status is completed", () => {
+  test("should not change status when media is already completed", () => {
     const anime: Anime = {
       id: "1",
       title: "Test Anime",
@@ -113,9 +112,10 @@ describe("startMedia", () => {
     const result = startMedia(anime);
 
     expect(result).toBe(anime);
+    expect(result!.status).toBe("completed");
   });
 
-  test("returns a new object when transitioning", () => {
+  test("should return a new object when transitioning from planned", () => {
     const anime: Anime = {
       id: "1",
       title: "Test Anime",
@@ -132,5 +132,27 @@ describe("startMedia", () => {
     const result = startMedia(anime);
 
     expect(result).not.toBe(anime);
+  });
+
+  test("should preserve id, title, type and activity after transition", () => {
+    const anime: Anime = {
+      id: "media-xyz",
+      title: "Original Title",
+      type: "anime",
+      activity: "watch",
+      status: "planned",
+      progress: {
+        current: 0,
+        total: 12,
+        unit: "episode",
+      },
+    };
+
+    const result = startMedia(anime);
+
+    expect(result!.id).toBe("media-xyz");
+    expect(result!.title).toBe("Original Title");
+    expect(result!.type).toBe("anime");
+    expect(result!.activity).toBe("watch");
   });
 });

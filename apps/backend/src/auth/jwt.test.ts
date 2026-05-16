@@ -12,7 +12,7 @@ describe("jwt", () => {
     process.env.JWT_SECRET = originalSecret;
   });
 
-  test("generateToken returns a string token", async () => {
+  test("should return a non-empty string token when generating", async () => {
     const { generateToken } = await import("./jwt");
 
     const token = generateToken({ id: "user-1", role: "USER" });
@@ -21,7 +21,7 @@ describe("jwt", () => {
     expect(token.length).toBeGreaterThan(0);
   });
 
-  test("verifyToken decodes the payload correctly", async () => {
+  test("should decode the same payload that was encoded", async () => {
     const { generateToken, verifyToken } = await import("./jwt");
 
     const payload = { id: "user-123", role: "ADMIN" };
@@ -32,13 +32,19 @@ describe("jwt", () => {
     expect(decoded.role).toBe("ADMIN");
   });
 
-  test("verifyToken throws on invalid token", async () => {
+  test("should throw when verifying an invalid token", async () => {
     const { verifyToken } = await import("./jwt");
 
-    expect(() => verifyToken("invalid-token-string")).toThrow();
+    expect(() => verifyToken("this-is-not-a-jwt")).toThrow();
   });
 
-  test("token includes exp claim", async () => {
+  test("should throw when verifying a malformed token", async () => {
+    const { verifyToken } = await import("./jwt");
+
+    expect(() => verifyToken("abc.def.ghi")).toThrow();
+  });
+
+  test("should include exp and iat claims in the decoded token", async () => {
     const { generateToken, verifyToken } = await import("./jwt");
 
     const token = generateToken({ id: "1", role: "USER" });
@@ -47,5 +53,14 @@ describe("jwt", () => {
     expect(decoded.exp).toBeDefined();
     expect(decoded.iat).toBeDefined();
     expect(decoded.exp).toBeGreaterThan(decoded.iat);
+  });
+
+  test("should throw when secret is not set", async () => {
+    process.env.JWT_SECRET = "";
+    vi.resetModules();
+
+    const { generateToken } = await import("./jwt");
+
+    expect(() => generateToken({ id: "1" })).toThrow();
   });
 });

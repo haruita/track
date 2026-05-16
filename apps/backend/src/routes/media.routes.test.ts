@@ -16,76 +16,87 @@ vi.mock("../prisma/client", () => ({
 import { prisma } from "../prisma/client";
 import { app } from "../app";
 
-describe("media routes", () => {
+describe("GET /media", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  describe("GET /media", () => {
-    test("returns all media", async () => {
-      const mediaList = [
-        { id: "1", title: "Anime 1", type: "anime" },
-        { id: "2", title: "Game 1", type: "game" },
-      ];
+  test("should return all media with status 200", async () => {
+    const mediaList = [
+      { id: "1", title: "Anime 1", type: "anime" },
+      { id: "2", title: "Game 1", type: "game" },
+    ];
 
-      vi.mocked(prisma.media.findMany).mockResolvedValue(mediaList as any);
+    vi.mocked(prisma.media.findMany).mockResolvedValue(mediaList as any);
 
-      const response = await request(app).get("/media");
+    const response = await request(app).get("/media");
 
-      expect(response.status).toBe(200);
-      expect(response.body).toEqual(mediaList);
-    });
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual(mediaList);
+  });
 
-    test("searches media by query parameter", async () => {
-      const mediaList = [{ id: "1", title: "Steins;Gate", type: "anime" }];
+  test("should return an empty array when no media exists", async () => {
+    vi.mocked(prisma.media.findMany).mockResolvedValue([]);
 
-      vi.mocked(prisma.media.findMany).mockResolvedValue(mediaList as any);
+    const response = await request(app).get("/media");
 
-      const response = await request(app).get("/media?q=Steins");
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual([]);
+  });
 
-      expect(response.status).toBe(200);
-      expect(prisma.media.findMany).toHaveBeenCalledWith({
-        where: { title: { contains: "Steins" } },
-      });
-    });
+  test("should filter media by title when query param q is provided", async () => {
+    const mediaList = [{ id: "1", title: "Steins;Gate", type: "anime" }];
 
-    test("returns empty array when no media matches", async () => {
-      vi.mocked(prisma.media.findMany).mockResolvedValue([]);
+    vi.mocked(prisma.media.findMany).mockResolvedValue(mediaList as any);
 
-      const response = await request(app).get("/media?q=NonExistent");
+    const response = await request(app).get("/media?q=Steins");
 
-      expect(response.status).toBe(200);
-      expect(response.body).toEqual([]);
+    expect(response.status).toBe(200);
+    expect(prisma.media.findMany).toHaveBeenCalledWith({
+      where: { title: { contains: "Steins" } },
     });
   });
 
-  describe("GET /media/:id", () => {
-    test("returns media by id", async () => {
-      const media = {
-        id: "media-1",
-        title: "Test Media",
-        type: "anime",
-        activity: "watch",
-        status: "watching",
-        progressTotal: 24,
-        progressUnit: "episode",
-      };
+  test("should return empty array when no media matches the search query", async () => {
+    vi.mocked(prisma.media.findMany).mockResolvedValue([]);
 
-      vi.mocked(prisma.media.findUnique).mockResolvedValue(media as any);
+    const response = await request(app).get("/media?q=NonExistentTitle");
 
-      const response = await request(app).get("/media/media-1");
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual([]);
+  });
+});
 
-      expect(response.status).toBe(200);
-      expect(response.body).toEqual(media);
-    });
+describe("GET /media/:id", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
 
-    test("returns 404 when media not found", async () => {
-      vi.mocked(prisma.media.findUnique).mockResolvedValue(null);
+  test("should return media by id with status 200", async () => {
+    const media = {
+      id: "media-1",
+      title: "Test Media",
+      type: "anime",
+      activity: "watch",
+      status: "watching",
+      progressTotal: 24,
+      progressUnit: "episode",
+    };
 
-      const response = await request(app).get("/media/nonexistent");
+    vi.mocked(prisma.media.findUnique).mockResolvedValue(media as any);
 
-      expect(response.status).toBe(404);
-      expect(response.body).toEqual({ message: "Media not found" });
-    });
+    const response = await request(app).get("/media/media-1");
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual(media);
+  });
+
+  test("should return 404 with error message when media is not found", async () => {
+    vi.mocked(prisma.media.findUnique).mockResolvedValue(null);
+
+    const response = await request(app).get("/media/nonexistent-id");
+
+    expect(response.status).toBe(404);
+    expect(response.body).toEqual({ message: "Media not found" });
   });
 });
