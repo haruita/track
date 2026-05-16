@@ -131,10 +131,7 @@ userRouter.put(
       return res.status(404).json({ message: "User not found" });
     }
 
-    const updated = await userRepository.create({
-      ...user,
-      avatarUrl,
-    } as any);
+    const updated = await userRepository.update(userId, { avatarUrl });
 
     res.json({
       id: updated.id,
@@ -154,15 +151,7 @@ userRouter.patch("/me/username", authMiddleware, async (req, res) => {
     return res.status(400).json({ message: "Username is required" });
   }
 
-  const user = await userRepository.findById(userId);
-  if (!user) {
-    return res.status(404).json({ message: "User not found" });
-  }
-
-  const updated = await userRepository.create({
-    ...user,
-    username: username.trim(),
-  } as any);
+  const updated = await userRepository.update(userId, { username: username.trim() });
 
   res.json({
     id: updated.id,
