@@ -4,33 +4,51 @@ import path from "path";
 import fs from "fs";
 
 const UPLOADS_DIR = path.resolve(process.cwd(), "uploads");
+const SEED_IMAGES_DIR = path.resolve(__dirname, "seed-images");
 
 const COVER_IMAGES = [
-  "445f6d52-ecb2-47ad-a261-51245b626630.jpg",
-  "7a0c050a-519d-42df-84ff-152594962b39.jpeg",
-  "91b05093-6cd4-4a1d-8f44-0372082f16b1.webp",
+  { filename: "steins-gate.jpg", mediaTitle: "Steins;Gate" },
+  { filename: "umineko.jpeg", mediaTitle: "Umineko no Naku Koro ni" },
+  { filename: "nier-automata.webp", mediaTitle: "NieR: Automata" },
 ];
 
-async function main() {
+function copySeedImages(): string[] {
   if (!fs.existsSync(UPLOADS_DIR)) {
     fs.mkdirSync(UPLOADS_DIR, { recursive: true });
   }
 
+  const copied: string[] = [];
+
+  for (const { filename } of COVER_IMAGES) {
+    const src = path.join(SEED_IMAGES_DIR, filename);
+    const dest = path.join(UPLOADS_DIR, filename);
+
+    if (fs.existsSync(src) && !fs.existsSync(dest)) {
+      fs.copyFileSync(src, dest);
+      copied.push(filename);
+    }
+  }
+
+  return copied;
+}
+
+async function main() {
   const existingMedia = await prisma.media.count();
   if (existingMedia > 0) {
     console.log("Database already seeded, skipping...");
     return;
   }
 
-  const availableFiles = COVER_IMAGES.filter((f) =>
-    fs.existsSync(path.join(UPLOADS_DIR, f))
-  );
+  const copied = copySeedImages();
+  console.log(`Copied ${copied.length} cover image(s) to uploads/`);
 
-  console.log(`Found ${availableFiles.length} cover image(s)`);
+  const availableFiles = COVER_IMAGES.filter(({ filename }) =>
+    fs.existsSync(path.join(UPLOADS_DIR, filename))
+  );
 
   const getImage = (index: number) =>
     availableFiles.length > 0
-      ? `/uploads/${availableFiles[index % availableFiles.length]}`
+      ? `/uploads/${availableFiles[index % availableFiles.length].filename}`
       : null;
 
   console.log("Creating media entries...");
