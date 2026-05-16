@@ -34,7 +34,7 @@ RUN mkdir -p apps/backend/uploads
 RUN npx prisma generate --schema=apps/backend/prisma/schema.prisma
 
 # Copy built frontend
-COPY --from=frontend-build /app/apps/frontend/dist ./dist/frontend
+COPY --from=frontend-build /app/apps/frontend/dist ./apps/backend/dist/frontend
 
 ENV NODE_ENV=production
 ENV PORT=3000
